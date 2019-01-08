@@ -1,0 +1,61 @@
+#!/bin/bash
+
+#looks in directory passed as arg
+cd $1
+
+#gets sorted list of files in directory
+direct=`ls -a $1 | sort -u`
+
+x=`ls -al $1 | grep ^- | wc -l`
+
+#declares array for the files
+declare -a ARRAY
+let count=0
+
+#loops through each file in the directory
+for FILE in $direct
+do
+    #checks for non readable files
+    if [ ! -r "$FILE" ];    
+    then    
+      echo "$direct/$FILE not readable"
+      #checks if hidden file, then adds them to array first to prioritze them
+    elif [ "$FILE" = . ] || [ "$FILE" = .. ];
+    then
+	continue
+    elif [[ "$FILE" =~ ^\. ]]; 
+    then
+      ARRAY=(${ARRAY[@]} "$FILE")
+      let "count++"
+    fi
+done
+
+#loops through file in directory
+for FILE in $direct
+do
+    #checks if readable
+  if [ ! -r "$FILE" ];
+  then
+      echo "$direct/$FILE not readable"
+  #checks if normal file then adds to the array
+  elif [ -f "$FILE" ] && [ ! -L "$FILE" ];
+  then
+      ARRAY=(${ARRAY[@]} "$FILE")
+      let "count++"
+  fi
+done
+
+#loops through array
+for (( i=0; i<count; i++ ))
+do
+    for (( j=i+1; j<count; j++ ))
+    do	
+	#compares the two array elements, if they are the same a hard link is created
+	cmp -s "${ARRAY[$i]}" "${ARRAY[$j]}"
+	if [ $? -eq 0 ]
+	then
+	    ln -f "${ARRAY[$i]}" "${ARRAY[$j]}"
+        fi
+    done
+done
+
