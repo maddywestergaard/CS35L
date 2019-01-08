@@ -1,0 +1,116 @@
+wget http://web.cs.ucla.edu/classes/fall18/cs35L/assign/coreutils-with-bug.tar.gz
+tar -xf coreutils-with-bug.tar.gz
+cd coreutils-with-bug
+./configure —-prefix=/u/ma/ugrad/westerga/coreutilsbug
+make
+
+This is the error that I got:
+In file included from utimecmp.c:41:0:
+utimens.h:2:5: error: conflicting types for 'futimens'
+ int futimens (int, char const *, struct timespec const [2]);
+     ^
+In file included from utimecmp.h:25:0,
+                 from utimecmp.c:25:
+/usr/include/sys/stat.h:373:12: note: previous declaration of 'futimens' was here
+ extern int futimens (int __fd, const struct timespec __times[2]) __THROW;
+            ^
+make[3]: *** [utimecmp.o] Error 1
+make[3]: Leaving directory `/w/home.13/ma/ugrad/westerga/cs35L/assn4/coreutils-with-bug/lib'
+make[2]: *** [all] Error 2
+make[2]: Leaving directory `/w/home.13/ma/ugrad/westerga/cs35L/assn4/coreutils-with-bug/lib'
+make[1]: *** [all-recursive] Error 1
+make[1]: Leaving directory `/w/home.13/ma/ugrad/westerga/cs35L/assn4/coreutils-with-bug'
+make: *** [all] Error 2
+
+The error is because there are two different declarations of futimens with conflicting types.
+
+wget http://web.cs.ucla.edu/classes/fall18/cs35L/assign/coreutils.diff
+patch -p0 < coreutils.diff
+make
+make install
+
+The patch fixes it because it renames on of the functions to coreutils_futimens
+
+Then to reproduce the bug:
+
+$tmp=$(mktemp -d)
+$ cd $tmp
+$ touch -d '1918-11-11 11:00 GMT' wwi-armistice
+$ touch now
+$ sleep 1
+$ touch now1
+$ ~/coreutilsbug/bin/ls -lt --full-time wwi-armistice now now1
+
+-rw-r--r-- 1 westerga maugrad 0 1918-11-11 03:00:00.000000000 -0800 wwi-armistice
+-rw-r--r-- 1 westerga maugrad 0 2018-11-01 13:43:01.854295003 -0700 now1
+-rw-r--r-- 1 westerga maugrad 0 2018-11-01 13:42:57.332217811 -0700 now
+
+This is buggy because the 1918 should be the last one listed, not the first.
+
+Now to debug...
+
+$ gdb ~/coreutilsbug/bin/ls
+$ info functions
+
+I did info functions to see all the functions in ls that may be causing the issue.
+The issue is with sorting the files, and so I looked for a function that would be 
+sorting them and found sort_files.
+
+$ list sort_files
+
+Within sort_files, there is the following code:
+case sort_time:
+(gdb)
+switch (time_type)
+{
+case time_ctime:
+     func = sort_reverse ? rev_cmp_ctime : compare_ctime;
+     break;
+case time_mtime:
+     func = sort_reverse ? rev_cmp_mtime : compare_mtime;
+     break;
+case time_atime:
+     func = sort_reverse ? rev_cmp_atime : compare_atime;
+     break;
+
+within this, it calls compare_atime. Looking into compare_atime, it looks like:
+
+$ list compare_atime
+
+timespec_cmp (struct timespec a, struct timespec b)
+{
+	int diff = a.tv_sec - b.tv_sec;
+	return diff ? diff : a.tv_nsec - b.tv_nsec;
+}
+
+The issue is with the diff causing overflow. The way to fix this would be to 
+check for overflow before.
+
+I found the timespec_cmp in the timespec.h file and then edited it.
+
+$ cd coreutils-with-bug/lib
+$ ls
+$ emacs timespec.h
+$ cp timespec.h ~/cs35L/assn4/
+$ emacs timespec.h
+
+Now to make the patch file:
+
+$ diff -u ~/cs35L/assn4/coreutils-with-bug/lib/timespec.h timespec.h > lab4.diff
+
+
+On the SEASnet Linux servers, it outputs this:
+
+$ touch -d '1918-11-11 11:00 GMT' wwi-armistice
+$ touch now
+$ sleep 1
+$ touch now1
+$ TZ=UTC0 ls -lt --full-time wwi-armistice now now1
+
+-rw-r--r-- 1 westerga maugrad 0 2054-12-17 17:28:16.000000000 +0000 wwi-armistice
+-rw-r--r-- 1 westerga maugrad 0 2018-11-01 20:05:56.471260000 +0000 now1
+-rw-r--r-- 1 westerga maugrad 0 2018-11-01 20:05:51.439797000 +0000 now
+
+SEASnet changes the 1918 and puts it in the future as 2054. The list is in chronological
+order, but the times are wrong. This could have to do with SEASnet wrapping when 
+overflow occurs.
