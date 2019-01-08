@@ -1,0 +1,36 @@
+First, I set up the beaglebone as outlined in the Piazza post.
+
+My partner was the client and I acted as the server.
+The steps I took as the server were as follows:
+
+To create a public key:
+
+$ ssh-keygen
+
+Then to add a new user and set the password:
+$ sudo useradd -d /home/newuser -m maddy
+$ sudo passwd maddy
+
+Then to make the .ssh directory
+$ cd /home/newuser
+$ sudo mkdir .ssh
+$ sudo chown -R maddy .ssh
+$ sudo chmod 700 .ssh
+
+Now that the server side is done and the account is created,
+my partner copied the id, added the account, and was able to log into
+my server.
+
+First I ran ifconfig on my computer to get the ip address.
+
+$ ssh-copy-id -i maddy@10.97.85.190
+$ ssh-add
+$ ssh -X maddy@10.97.85.190
+
+Then she entered in the password that I had set on my computer 
+and was able to log into my server.
+
+Then she ran 
+$ xterm
+
+and the xterm terminal popped up.
