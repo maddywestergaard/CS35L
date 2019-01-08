@@ -1,0 +1,37 @@
+Q1: The patch makes the performance worse, since now whenever
+ls -aA is called it has to go through the separate function 
+to run it. It makes the usability better, however.
+
+Q2: Using the patch may introduce other problems with the
+application if in anywhere in the application ls -aA is 
+called. In that case, the redefined behavior for ls would have
+to be accounted for and adjusted.
+
+Q3: This is what inputs when /dev/null is passed as an argument
+
+Traceback (most recent call last):
+  File "randline.py", line 70, in <module>
+    main()
+  File "randline.py", line 64, in main
+    sys.stdout.write(generator.chooseline())
+  File "randline.py", line 34, in chooseline
+    return random.choice(self.lines)
+  File "/usr/local/cs/Python-2.7.14/lib/python2.7/random.py", line 277, 
+in choice
+    return seq[int(self.random() * len(seq))]  
+    # raises IndexError if seq is empty
+IndexError: list index out of range
+
+This happens because the program trys to read a line from an empty file, 
+which results in undefined behavior
+
+Q4: Running on Python 3 gives this error:
+
+  File "randline.py", line 65
+    except IOError as (errno, strerror):
+                      ^
+
+SyntaxError: invalid syntax
+
+Python3 does not support automatic tuple unpacking like python2 does, 
+so then it throws a syntax error.
