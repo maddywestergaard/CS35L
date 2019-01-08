@@ -1,0 +1,207 @@
+tr2b.c:
+emacs tr2b.c
+I first checked for the errors of different lengths between from and to,
+ and for duplicate bytes in from.
+Then I made a while loop on the condition of while the char a hasn’t
+reached the end of file. In the while loop, there is a for loop that
+checks if any byte in from matches the current char a. If yes, then it
+puts the corresponding char from to, and if not, then it puts the current
+char a.
+
+tr2u.c:
+emacs tr2u.c
+I first checked for the errors of different lengths between from and to,
+and for duplicate bytes in from. Then, instead of checking for EOF in
+the while loop, I checked to see if the input of the read call was
+greater than 0. The for loop was the same, but instead of put I used write,
+and instead of get I used read. I had some trouble dealing with segmentation
+faults for this program, because I wasn't passing the character by reference
+to the read and write commands.
+
+emacs test.txt
+Then I made a file of 5,000,000 bytes called test.txt to run the tests on.
+
+Then I ran the tests for both copying the file to a new file, and for copying the file to the terminal.
+
+COPYING FILE TO ANOTHER FILE:
+
+strace -c ./tr2b 'abcd' 'efgh' < test.txt > test2.txt
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 66.13    0.000492           1       639           write
+ 33.87    0.000252           0       641           read
+  0.00    0.000000           0         2           open
+  0.00    0.000000           0         2           close
+  0.00    0.000000           0         4           fstat
+  0.00    0.000000           0         9           mmap
+  0.00    0.000000           0         4           mprotect
+  0.00    0.000000           0         1           munmap
+  0.00    0.000000           0         1           brk
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+  0.00    0.000000           0         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.000744                  1306         1 total
+
+
+strace -c ./tr2u 'abcd' 'efgh' < test.txt > test2.txt
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 57.16   37.754010           7   5234406           write
+ 42.84   28.290487           5   5234408           read
+  0.00    0.000000           0         2           open
+  0.00    0.000000           0         2           close
+ 0.00    0.000000           0         2           fstat
+  0.00    0.000000           0         7           mmap
+  0.00    0.000000           0         4           mprotect
+  0.00    0.000000           0         1           munmap
+  0.00    0.000000           0         1           brk
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+  0.00    0.000000           0         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00   66.044497              10468836         1 total
+
+There are 10468836 calls for unbuffered while only 1306 to buffered.
+
+COPYING FROM FILE TO TERMINAL:
+
+strace -c ./tr2b 'abcd' 'efgh' < test.txt
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 98.69    0.626973          17     36838           write
+  1.19    0.007549          12       641           read
+  0.04    0.000250          28         9           mmap
+  0.03    0.000169          42         4           mprotect
+  0.02    0.000105          26         4           fstat
+  0.01    0.000073          73         1           munmap
+  0.01    0.000072          36         2           open
+  0.01    0.000038          38         1         1 access
+  0.01    0.000036          18         2           close
+  0.00    0.000026          26         1           arch_prctl
+  0.00    0.000018          18         1           brk
+  0.00    0.000000           0         1           execve
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.635309                 37505         1 total
+
+
+strace -c ./tr2u 'abcd' 'efgh' < test.txt
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 57.00   35.143701           7   5234406           write
+ 43.00   26.511090           5   5234408           read
+  0.00    0.000027           7         4           mprotect
+  0.00    0.000014          14         1           munmap
+  0.00    0.000012           2         7           mmap
+  0.00    0.000004           4         1           arch_prctl
+  0.00    0.000000           0         2           open
+  0.00    0.000000           0         2           close
+  0.00    0.000000           0         2           fstat
+  0.00    0.000000           0         1           brk
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+------ ----------- ----------- --------- --------- ----------------
+100.00   61.654848              10468836         1 total
+
+The unbuffered has 10468836 calls, while the buffered has significantly less, 37505 calls.
+
+What's interesting about this is that the buffered one has significantly less calls
+when copying to another file vs. the same program copying to the terminal.
+However, the unbuffered has the same amount of calls regardless.
+In addition, the unbuffered takes less time when copying to the terminal vs copying to
+another file while the buffered takes more time.
+
+Then running the time command:
+time ./tr2b 'abcd' 'efgh' < test.txt > test2.txt
+
+real 0m0.280s
+user 0m0.223s
+sys  0m0.012s
+
+time ./tr2u 'abcd' 'efgh' < test.txt > test2.txt
+
+real 0m29.447s
+user 0m2.467s
+sys  0m20.921s
+
+The unbuffered is about 60 times slower than the buffered version
+
+
+
+TIME COMPARISION for sfrob:
+
+sfrob:
+
+for one line:
+time ./sfrob < ~/cs35L/assn5/testing.txt
+real	0m0.021s
+user	0m0.001s
+sys	0m0.005s
+
+for 500 lines:
+real	0m0.019s
+user	0m0.008s
+sys	0m0.008s
+
+sfrobu:
+
+for one line:
+time ./sfrobu < testing.txt
+real 0m0.005s
+user 0m0.001s
+sys  0m0.003s
+
+for 500 lines:
+real	0m0.058s
+user	0m0.012s
+sys	0m0.045s
+
+sfrobs:
+
+for one line:
+time ./sfrobs.sh < testing.txt
+real	0m0.833s
+user	0m0.257s
+sys	0m0.618s
+
+for 500 lines:
+real	0m0.868s
+user	0m0.280s
+sys	0m0.628s
+
+sfrobs -f:
+
+for one line:
+time ./sfrobs.sh -f < testing.txt
+real	0m0.834s
+user	0m0.257s
+sys	0m0.622s
+
+for 500 lines:
+real	0m0.880s
+user	0m0.258s
+sys	0m0.663s
+
+sfrobu -f:
+
+for one line:
+time ./sfrobu -f < testing.txt
+real 0m0.005s
+user 0m0.002s
+sys  0m0.003s
+
+for 500 lines:
+real	0m0.062s
+user	0m0.018s
+sys	0m0.043s
+
+
+Overall, sfrobs and sfrob are the same speed no matter the amount of lines.
+sfrobu on the other hand goes a lot slower with more lines.
+
+sfrob is the fastest, then sfrobu, then sfrobs. sfrobs is the slowest
+by a lot, but if there are significantly more lines in the text file then
+sfrobu will be slower since sfrobs time doesn't depend on the amount of
+lines in the file.
+
+the -f option makes the programs go slightly slower with more lines.
