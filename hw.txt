@@ -1,0 +1,18 @@
+HW QUESTIONS
+
+1. The network would still be secure even if the other teams had been
+observing all the bytes going across the network. This is because they
+would only have access to the encrypted version, and would need the private 
+keys to decrypt it and get the information.
+    (1) if they tapped the keyboards, they would know the passphrases but it
+    	wouldnt make a difference because they would still need the keys
+	to decrypt the bytes.
+    (2) If the teams had physical control of the USB, then we would be in 
+    	trouble since they could then have access to the .ssh file and get
+	the keys to decrypt the bytes.
+
+2. The gpg2 --verify command doesnt really verify that you personally created
+the file because it only verifies that the public key matches the signature.
+You can fix this by using a company or other third party that tracks who posts
+the key and who generated it. This would be another step to verify that the 
+person trying to access the information is allowed to.
