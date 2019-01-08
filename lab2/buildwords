@@ -1,0 +1,14 @@
+#!/bin/bash                                                                                                                                  
+
+sed '/<\/tr>/,/<\/td>/d' |
+sed 's/<[^>]*>//g' |
+sed "s/\`/\'/" |
+sed "s/\`/\'/" |
+tr '[:upper:]' '[:lower:]' |
+sed 's/,/\n/' |
+tr -cs " pk\'mnwlhaeiou" '[\n*]' |
+sed '/^\s*$/d' |
+sed '/^hawaiian/,/hawaiian/d' |
+sed '/^\s*en/,/hawaiian/d' |
+sed 's/^\s*\s//g' |
+sort -u

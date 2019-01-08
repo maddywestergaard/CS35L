@@ -1,0 +1,120 @@
+copy words into my directory:
+cp /usr/share/dict/words ./cs35L/assn2/
+
+sort the words:
+sort words -o wordssort
+
+rename:
+mv wordssort words
+
+get assignment 2 html:
+wget https://web.cs.ucla.edu/classes/fall18/cs35L/assign/assign2.html
+
+remame:
+Mv assign2.html assn2.txt
+
+COMMANDS:
+tr -c 'A-Za-[\n*]' < assn2.txt
+This replaces all characters that t letters with a new line.
+
+tr -cs 'A-Za-[\n*]' < assn2.txt
+Same as first w/o empty new lines because it deletes any repeated characters.
+
+tr -cs 'A-Za-z' '[\n*]' < assn2.txt | sort
+Sorts all the words from last one in alphabetical order 
+
+tr -cs 'A-Za-z' '[\n*]' < assn2.txt | sort -u
+Deletes all the duplicates of the words and only shows each word once.
+
+tr -cs 'A-Za-z' '[\n*]' < assn2.txt | sort -u | comm - words
+This compares the output to the last command to the file words. 
+
+tr -cs 'A-Za-z' '[\n*]' < assn2.txt | sort -u | comm -23 - words
+This command only shows column 1 from the last command- words unique to file1.
+
+get hawaiian words:
+wget http://mauimapp.com/moolelo/hwnwdseng.htm
+
+#!/bin/bash
+
+#deletes all of the American words
+sed '/<\/tr>/,/<\/td>/d' |
+
+#deletes all words in <>
+sed 's/<[^>]*>//g' |
+
+#replaces all ` 
+sed "s/\`/\'/" |
+#replaces the second ` 
+sed "s/\`/\'/" |
+
+#makes all uppercase lowercase
+tr '[:upper:]' '[:lower:]' |
+
+#replaces all commas with a new line
+sed 's/,/\n/' |
+
+#deletes all non-hawaiian words
+tr -cs " pk\'mnwlhaeiou" '[\n*]' |
+
+#deletes all white lines
+sed '/^\s*$/d' |
+
+#deletes the beginning words
+sed '/^hawaiian/,/hawaiian/d' |
+sed '/^\s*en/,/hawaiian/d' |
+
+#deletes all the white space before words
+s/^\s*\s// |
+sort -u
+
+makes it executable:
+Chmod +x buildwords
+
+makes list of hawaiian words into file hwords:
+cat hwnwdseng.htm | ./buildwords > hwords
+
+To check Hawaiian misspellings:
+cat assign2.[: | [\ | sort -u | comm -23 - hwords > hawaiianmisspell
+
+Wc hawaiianmisspell
+
+203 words
+
+To check English misspellings:
+
+Cat assign2.html | tr -[: | sort -u | comm -23 - words > englishmisspell
+
+Wc englishmisspell
+39 words
+
+Misspelled in English but not hawaiian:
+
+Comm englishmisspell hawaiianmisspell -23 | sort -u > enghaw
+
+Comm enghaw hwords -12
+
+I got two words: halau and wiki
+
+Misspelled in hawaiian but not in English: 
+
+Comm hawaiianmisspell Englishmisspell -23 | sort -u > haweng
+
+Comm haweng words -12 | wc -l
+
+There are 111 words.
+Examples: 
+a
+ail
+ain
+ake
+al
+ale
+alen
+all
+amine
+amp
+ample
+an
+aph
+awk
