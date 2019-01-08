@@ -1,0 +1,15 @@
+#!/bin/bash
+
+export LC_ALL='C'
+
+for i in {0..255}; do
+    frob+="$(printf $printf "\\%03o" $((i)))";
+    unfrob+="$(printf $printf "\\%03o" $((i ^ 0x2A)))";
+done
+
+
+if [ "$1" = "-f" ]; then 
+    tr "$unfrob" "$frob" | sort -f | tr "$frob" "$unfrob"
+else
+    tr "$unfrob" "$frob" | sort | tr "$frob" "$unfrob"
+fi;
