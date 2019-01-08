@@ -1,0 +1,45 @@
+First i checked the version to make sure it was new enough.
+
+$sort --version
+sort (GNU coreutils) 8.30
+
+Then I created the file with 2^24 float numbers.
+I used the od description to find the options needed for this.
+I used -An so that the first output line would not be preceded by
+the input offset.
+I used -t -fF to specify the type float.
+I used -N $((2**24*4)) to specify the number of bytes in the file.
+(2^24 floats)*(4 bytes each)
+then i used tr to replace all the blank with a new line character.
+My testing file is float.txt
+
+od -An -t fF -N $((2**24*4)) < /dev/urandom | tr -s ' ' '\n' > float.txt
+
+Then to check the time of the sort:
+
+$ time -p sort -g float.txt > /dev/null
+real 38.08
+user 202.46
+sys 0.82
+
+with the parallel options:
+
+$ time -p sort -g --parallel=1 float.txt > /dev/null
+real 182.50
+user 182.15
+sys 0.34
+
+$ time -p sort -g --parallel=2 float.txt > /dev/null
+real 98.74
+user 187.86
+sys 0.46
+
+$ time -p sort -g --parallel=4 float.txt > /dev/null
+real 58.18
+user 196.05
+sys 0.63
+
+$ time -p sort -g --parallel=8 float.txt > /dev/null
+real 36.84
+user 202.44
+sys 0.79
