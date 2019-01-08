@@ -1,0 +1,97 @@
+1. 
+$ emacs hw9.txt
+
+2. check out v3.0 of diffutils from repo 
+$ cd diffutils
+add branch quote:
+$ git checkout -b 'quote' 'v3.0'
+
+3. apply patch
+$ patch -p1 < quote-3.0-patch.txt
+
+5. 
+For each file that was changed, go into the file using emacs
+and then do C-x 4 a and add the component from the other ChangeLog
+that matches that file:
+
+* src/util.c (finish_output):
+
+* src/sdiff.c (try_help, usage, check_child_status, main):
+
+* src/dir.c (compare_names):
+
+* src/diff3.c (main, try_help, option_help_msgid, usage)
+            (read_diff):
+
+* src/diff.c (main, try_help, option_help_msgid, specify_value)
+            (compare_files):
+        
+* src/cmp.c (try_help, specify_ignore_initial, usage, main):
+        Quote 'like this' in output.
+
+6. commit the changes
+$ git add .
+$ git commit -F ChangeLog
+
+7. to get the formatted patch
+$ git format-patch --stdout -1 > formatted-patch.txt
+
+8. verifying partners:
+first make a new branch within diffutils
+
+$ git checkout -b 'partner' 'v3.0'
+
+Then I downloaded his patch and applied it
+
+$ git am < formatted-patch.txt
+
+The patch succeeded, so i build the system
+
+$ ./bootstrap
+$ configure
+$ make
+$ make check
+
+and it worked!
+
+9. verifying the ChangeLog:
+go back to my branch and run the command:
+
+$ make distdir
+
+then find the new diffutils folder it made:
+
+$ cd diffutils-3.0.1-43fe
+
+Then enter into the ChangeLog:
+
+$ emacs ChangeLog
+
+It worked, my change log entry was at the top of the list with my commit!
+
+2018-12-05  Madison Ann Westergaard  <westerga@lnxsrv09.seas.ucla.edu>
+
+        2018-12-05  Madison Ann Westergaard  <westerga@lnxsrv09.seas.ucla.edu>
+                * src/util.c (finish_output):
+
+                * src/sdiff.c (try_help, usage, check_child_status, main):
+
+                * src/dir.c (compare_names):
+
+                * src/diff3.c (main, try_help, option_help_msgid, usage)
+                    (read_diff):
+
+                * src/diff.c (main, try_help, option_help_msgid, specify_value)
+                    (compare_files):
+                * src/cmp.c (try_help, specify_ignore_initial, usage, main):
+                Quote 'like this' in output.
+
+10. This had to be done in XQuartz:
+
+$ ssh -Y westerga@lnxsrv.seas.ucla.edu
+$ cd ~eggert/src/gnu/emacs
+$ gitk
+
+then a new window popped up and i saw the newest merge that is 
+not newer than 2015-01-25 is from 2015-01-24 19:00:41 from
+Professor Eggert
