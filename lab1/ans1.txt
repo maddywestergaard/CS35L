@@ -1,0 +1,81 @@
+1. I used man man to find this:
+man -k keyword
+
+2. commands:
+   which mv
+   which sh
+   
+mv: /usr/bin/mv
+sh: /usr/bin/sh
+
+3. Command: find /usr/bin -executable -name ?r
+/usr/bin/ar
+/usr/bin/pr
+/usr/bin/tr
+
+4. Command: readlink /usr/bin/emacs
+/etc/alternatives/emacs
+
+5. Command: gcc --version
+gcc (GCC) 8.2.0
+
+Command: /usr/bin/gcc --version
+gcc (GCC) 4.8.5 
+
+They are different because prepending the path changes the version of gcc.
+
+6. u+sx means that the user (owner of the file) has permissions to  set user or group ID on execution (s) and execute (x) and other users (o) no longer have permission to write
+
+7. find /usr/local/cs/ -type d -mtime -28
+
+8. whereis find
+find . /usr/bin/ -type l| wc -l
+
+There are 302 symbolic link files in the same directory as find.
+ 
+9. find /usr/lib64 -type f -printf '%T+ %p\n' |sort -n | head
+
+2000-05-17+04:08:44.0000000000 /usr/lib64/tcl8.5/Tix8.4.3/bitmaps/act_fold.gif
+2000-05-17+04:08:44.0000000000 /usr/lib64/tcl8.5/Tix8.4.3/bitmaps/file.gif
+2000-05-17+04:08:44.0000000000 /usr/lib64/tcl8.5/Tix8.4.3/bitmaps/folder.gif
+2000-05-17+04:08:44.0000000000 /usr/lib64/tcl8.5/Tix8.4.3/bitmaps/info.gif
+2000-05-17+04:08:44.0000000000 /usr/lib64/tcl8.5/Tix8.4.3/bitmaps/minusarm.gif
+2000-05-17+04:08:44.0000000000 /usr/lib64/tcl8.5/Tix8.4.3/bitmaps/minus.gif
+2000-05-17+04:08:44.0000000000 /usr/lib64/tcl8.5/Tix8.4.3/bitmaps/no_entry.gif
+2000-05-17+04:08:44.0000000000 /usr/lib64/tcl8.5/Tix8.4.3/bitmaps/openfold.gif
+2000-05-17+04:08:44.0000000000 /usr/lib64/tcl8.5/Tix8.4.3/bitmaps/plusarm.gif
+2000-05-17+04:08:44.0000000000 /usr/lib64/tcl8.5/Tix8.4.3/bitmaps/plus.gif 
+
+10. man locale states that the locale command gets the data from the environment settings
+man localedef shows that localedef holds all the definitions for the locale, so based on the environment settings, locale gets its data from localedef
+
+11. C-h a downcase
+
+downcase-dwim
+downcase-region
+downcase-word
+
+12. ESC <F1> to find all commands starting with M, then found the names of commands C-M-r and C-M-v.
+Then used C-h a followed by the names of the commands to find the description.
+
+C-M-r isearch-backward-regexp: Do incremental search backward for regular expression.
+C-M-v scroll-other-window: Scroll next window upward ARG lines; or near full screen if no ARG.
+
+13. C-h K C-g
+C-g gets rid of any partially typed command, stops the command that is running in a safe way.
+
+14. C-h f yank
+yank reinserts the last stretch of killed text. The keystroke is C-y
+
+15. command for ls:
+cd /usr/bin
+ls -l
+
+command for dired:
+C-h a dired
+C-x d /usr/bin
+
+The difference if that dired shows the following directories while ls does not:
+dr-xr-xr-x.   2 root root       81920 Oct  2 15:22 .
+drwxr-xr-x.  16 root root        4096 May 22 08:13
+  
