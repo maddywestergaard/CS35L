@@ -1,0 +1,13 @@
+the subwindows:
+
+starting from top left:
+all of the merges arranged in a tree type view with the title and comment
+then to the right of that has all the names and emails associated with the commit
+then to the right of that has the date and time of the commit
+
+then under that there is a bar for find/search, SHAI ID, and Row
+
+and then under that on the left has the commit information, including
+parent, child, branches, follows, precedess, and the log info.
+
+Then on the right of that has a table of contents of sorts for the log info
